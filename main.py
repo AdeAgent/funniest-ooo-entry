@@ -28,13 +28,24 @@ LINE = (
 )
 
 
-def main() -> None:
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "entry.txt")
+def write_line(path: str) -> None:
     # newline="" keeps the reply a single line with no trailing newline.
     with open(path, "w", encoding="utf-8", newline="") as fh:
         fh.write(LINE)
+    # Self-check: the gate accepts 1 to 160 characters on one line, so
+    # prove the file on disk is exactly the reply before exiting.
+    with open(path, "rb") as fh:
+        data = fh.read()
+    text = data.decode("utf-8")
+    assert text == LINE and "\n" not in text and 1 <= len(text) <= 160, (
+        f"entry.txt must be one line of at most 160 characters, got {text!r}"
+    )
+
+
+def main() -> None:
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    os.makedirs(out_dir, exist_ok=True)
+    write_line(os.path.join(out_dir, "entry.txt"))
 
 
 if __name__ == "__main__":
